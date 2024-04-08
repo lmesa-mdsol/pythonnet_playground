@@ -1,8 +1,11 @@
 ﻿using Playground;
 using Python.Runtime;
 
+// Dynamic Link Library
+// .dylib on mac
 Runtime.PythonDLL = "/Library/Frameworks/Python.framework/Versions/3.10/bin/python3.10";
 PythonEngine.Initialize();
+
 using (Py.GIL())
 {
     var person = new Person("John", "Smith");
@@ -33,6 +36,7 @@ Console.Clear();
 
 Runtime.PythonDLL = "/Library/Frameworks/Python.framework/Versions/3.10/bin/python3.10";
 PythonEngine.Initialize();
+
 using (Py.GIL())
 {
     using (PyModule scope = Py.CreateScope())
@@ -52,6 +56,9 @@ using (Py.GIL())
 
         scope.Exec("desc = desc + ' Hello World!'");
         Console.WriteLine(scope.GetAttr("desc"));
+
+        var str = scope.Get<string>("desc");
+        Console.WriteLine(str);
     }
 }
 
@@ -68,9 +75,25 @@ Console.Clear();
 
 Runtime.PythonDLL = "/Library/Frameworks/Python.framework/Versions/3.10/bin/python3.10";
 PythonEngine.Initialize();
+
 using (Py.GIL())
 {
+    dynamic sys = Py.Import("sys");
+    sys.path.append("/Users/lmesa/Repos/pythonnet_playground/Playground/");
+    
+    var myScript = Py.Import("test_script");
+    
+    var hello = myScript.InvokeMethod("get_hello");
+    Console.WriteLine(hello);
+
+    var param = new PyString("workbench");
+    var res = myScript.InvokeMethod("test_with_param", new PyObject[] { param });
+    Console.WriteLine(res);
+    
+    // Dynamic
+    dynamic dynamicScript = Py.Import("test_script");
+    var dynRes = dynamicScript.test_with_param("224");
+    Console.WriteLine(dynRes);
 }
 
 PythonEngine.Shutdown();
-Console.Clear();
